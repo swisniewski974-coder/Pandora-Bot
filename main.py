@@ -45,8 +45,8 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    # Sprawdzamy tylko kanał giełda
-    if message.channel.name == "giełda":
+    # Sprawdzamy czy nazwa kanału zawiera 'giełda' lub 'gielda'
+    if "giełda" in message.channel.name.lower() or "gielda" in message.channel.name.lower():
         user_id = message.author.id
         current_time = time.time()
 
@@ -57,13 +57,9 @@ async def on_message(message):
         # Jeśli użytkownik przekroczył limit wiadomości (spam / zabawa botem)
         if len(spam_tracker[user_id]) > SPAM_LIMIT:
             try:
-                # Zabieramy użytkownikowi uprawnienia do pisania/czytania na tym konkretnym kanale
                 await message.channel.set_permissions(message.author, send_messages=False, read_messages=False)
-                await message.delete() # Usuwamy wiadomość spamową
-                
-                # Informacja prywatna lub ostrzeżenie na kanale
+                await message.delete()
                 warning_msg = await message.channel.send(f"⚠️ {message.author.mention} został wyrzucony z kanału za spam/śmiecenie!")
-                # Usunięcie ostrzeżenia po 5 sekundach żeby nie śmiecić
                 await warning_msg.delete(delay=5)
             except Exception as e:
                 print(f"Błąd anty-spamu: {e}")
@@ -74,10 +70,6 @@ async def on_message(message):
 @bot.command()
 async def setup_gielda(ctx):
     """Komenda wysyłająca główny panel giełdy na kanał"""
-    if ctx.channel.name != "giełda":
-        await ctx.send("Tę komendę można wykonać tylko na kanale #giełda.")
-        return
-
     embed = discord.Embed(
         title="⚔️ GIEŁDA PANDORA MT2 ⚔️",
         description="Kupuj i wystawiaj przedmioty bez spamu na kanale!\n\n**Jak to działa?**\nKliknij przycisk poniżej.",
