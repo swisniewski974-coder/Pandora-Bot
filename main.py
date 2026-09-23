@@ -1,5 +1,6 @@
 import os
 import discord
+from discord import app_commands
 from discord.ext import commands
 from collections import defaultdict
 import time
@@ -15,8 +16,6 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Słownik do śledzenia spamu: {user_id: [timestamp1, timestamp2, ...]}
 spam_tracker = defaultdict(list)
-
-# Limity anty-spamu: np. max 4 wiadomości w ciągu 5 sekund to spam
 SPAM_LIMIT = 4
 TIME_WINDOW = 5
 
@@ -38,6 +37,11 @@ class GieldaView(discord.ui.View):
 
 @bot.event
 async def on_ready():
+    try:
+        synced = await bot.tree.sync()
+        print(f"Zsynchronizowano komendy slash: {len(synced)}")
+    except Exception as e:
+        print(e)
     print(f"Zalogowano jako {bot.user}")
 
 @bot.event
@@ -45,16 +49,13 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    # Sprawdzamy czy nazwa kanału zawiera 'giełda' lub 'gielda'
     if "giełda" in message.channel.name.lower() or "gielda" in message.channel.name.lower():
         user_id = message.author.id
         current_time = time.time()
 
-        # Czyszczenie starych wpisów czasowych dla użytkownika
         spam_tracker[user_id] = [t for t in spam_tracker[user_id] if current_time - t < TIME_WINDOW]
         spam_tracker[user_id].append(current_time)
 
-        # Jeśli użytkownik przekroczył limit wiadomości (spam / zabawa botem)
         if len(spam_tracker[user_id]) > SPAM_LIMIT:
             try:
                 await message.channel.set_permissions(message.author, send_messages=False, read_messages=False)
@@ -67,16 +68,16 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-@bot.command()
-async def setup_gielda(ctx):
-    """Komenda wysyłająca główny panel giełdy na kanał"""
+@bot.tree.command(name="setup_gielda", description="Wysyła główny panel giełdy na kanał")
+async def setup_gielda(interaction: discord.Interaction):
     embed = discord.Embed(
         title="⚔️ GIEŁDA PANDORA MT2 ⚔️",
         description="Kupuj i wystawiaj przedmioty bez spamu na kanale!\n\n**Jak to działa?**\nKliknij przycisk poniżej.",
         color=discord.Color.blue()
     )
     view = GieldaView()
-    await ctx.send(embed=embed, view=view)
+    await interaction.response.send_message("Panel giełdy został wygenerowany pomyślnie!", ephemeral=True)
+    await interaction.channel.send(embed=embed, view=view)
 
 if __name__ == "__main__":
     bot.run(TOKEN)
