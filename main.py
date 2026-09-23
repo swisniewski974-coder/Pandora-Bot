@@ -1,6 +1,5 @@
 import os
 import discord
-from discord import app_commands
 from discord.ext import commands
 from collections import defaultdict
 import time
@@ -14,7 +13,6 @@ intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Słownik do śledzenia spamu: {user_id: [timestamp1, timestamp2, ...]}
 spam_tracker = defaultdict(list)
 SPAM_LIMIT = 4
 TIME_WINDOW = 5
@@ -37,11 +35,6 @@ class GieldaView(discord.ui.View):
 
 @bot.event
 async def on_ready():
-    try:
-        synced = await bot.tree.sync()
-        print(f"Zsynchronizowano komendy slash: {len(synced)}")
-    except Exception as e:
-        print(e)
     print(f"Zalogowano jako {bot.user}")
 
 @bot.event
@@ -68,16 +61,15 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-@bot.tree.command(name="setup_gielda", description="Wysyła główny panel giełdy na kanał")
-async def setup_gielda(interaction: discord.Interaction):
+@bot.command(name="setup_gielda")
+async def setup_gielda(ctx):
     embed = discord.Embed(
         title="⚔️ GIEŁDA PANDORA MT2 ⚔️",
         description="Kupuj i wystawiaj przedmioty bez spamu na kanale!\n\n**Jak to działa?**\nKliknij przycisk poniżej.",
         color=discord.Color.blue()
     )
     view = GieldaView()
-    await interaction.response.send_message("Panel giełdy został wygenerowany pomyślnie!", ephemeral=True)
-    await interaction.channel.send(embed=embed, view=view)
+    await ctx.send(embed=embed, view=view)
 
 if __name__ == "__main__":
     bot.run(TOKEN)
