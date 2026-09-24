@@ -5,7 +5,8 @@ from discord.ext import commands
 
 # --- KONFIGURACJA ---
 # Wklej swój token w cudzysłowie poniżej:
-TOKEN = "TUTAJ_WKLEJ_SWÓJ_TOKEN_DISCORD"
+TOKEN = "TOKEN = "TUTAJ_WKLEJ_SWÓJ_TOKEN_DISCORD"
+"
 GIELDA_CHANNEL_ID = (  # Zmień na ID swojego kanału giełdowego (musi być samymi cyframi!)
     123456789012345678
 )
