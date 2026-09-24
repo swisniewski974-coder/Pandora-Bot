@@ -3,13 +3,8 @@ import os
 import discord
 from discord.ext import commands
 
-# --- KONFIGURACJA ---
-# Wklej swój token w cudzysłowie poniżej:
-TOKEN = "TOKEN = os.getenv("TOKEN")
-"
-GIELDA_CHANNEL_ID = (  # Zmień na ID swojego kanału giełdowego (musi być samymi cyframi!)
-    123456789012345678
-)
+TOKEN = os.getenv("TOKEN")
+GIELDA_CHANNEL_ID = 123456789012345678
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -19,7 +14,6 @@ MARKET_FILE = "market_offers.json"
 WIKI_FILE = "wiki_data.json"
 
 
-# --- FUNKCJE POMOCNICZE (Baza Danych JSON) ---
 def load_json(filename):
   if os.path.exists(filename):
     with open(filename, "r", encoding="utf-8") as f:
@@ -33,11 +27,6 @@ def load_json(filename):
 def save_json(filename, data):
   with open(filename, "w", encoding="utf-8") as f:
     json.dump(data, f, indent=4, ensure_ascii=False)
-
-
-# ==========================================
-# 1. MODUŁ GIEŁDY (Czat -> Chmura + Przyciski)
-# ==========================================
 
 
 class MarketView(discord.ui.View):
@@ -116,14 +105,8 @@ async def panel_gieldy(ctx):
   await ctx.send(embed=embed, view=MarketView())
 
 
-# ==========================================
-# 2. MODUŁ WIKI OGÓLNEJ PANDORAMT2MOBILE
-# ==========================================
-
-
 @bot.command(name="wiki")
 async def wiki(ctx, *, query: str = None):
-  """Ogólna wyszukiwarka po całej bazie Wiki"""
   if not query:
     embed = discord.Embed(
         title="📖 Ogólne Wiki Pandoramt2Mobile",
@@ -172,7 +155,6 @@ async def wiki(ctx, *, query: str = None):
 
 @bot.command(name="bossy")
 async def bossy(ctx):
-  """Wyświetla listę głównych bossów z bazy Wiki"""
   wiki_data = load_json(WIKI_FILE)
   boss_list = wiki_data.get("bossy", {})
 
@@ -182,48 +164,31 @@ async def bossy(ctx):
       color=discord.Color.red(),
   )
   if not boss_list:
-    embed.add_field(
-        name="Brak danych",
-        value=(
-            "Administrator nie dodał jeszcze bossów. Użyj `!dodaj_wiki` aby"
-            " dodać."
-        ),
-    )
+    embed.add_field(name="Brak danych", value="Brak dodanych bossów.")
   else:
     for key, data in boss_list.items():
       embed.add_field(
-          name=data["title"],
-          value=data.get("info", "Brak info"),
-          inline=False,
+          name=data["title"], value=data.get("info", "Brak info"), inline=False
       )
   await ctx.send(embed=embed)
 
 
 @bot.command(name="dungeony")
 async def dungeony(ctx):
-  """Wyświetla listę dungeonów z bazy Wiki"""
   wiki_data = load_json(WIKI_FILE)
   dung_list = wiki_data.get("dungeony", {})
 
   embed = discord.Embed(
       title="🏰 Dungeony w Pandoramt2Mobile",
-      description="Wymagania i informacje o wyprawach:",
+      description="Wymagania i informacje:",
       color=discord.Color.orange(),
   )
   if not dung_list:
-    embed.add_field(
-        name="Brak danych",
-        value=(
-            "Administrator nie dodał jeszcze dungeonów. Użyj `!dodaj_wiki`"
-            " aby dodać."
-        ),
-    )
+    embed.add_field(name="Brak danych", value="Brak dodanych dungeonów.")
   else:
     for key, data in dung_list.items():
       embed.add_field(
-          name=data["title"],
-          value=data.get("info", "Brak info"),
-          inline=False,
+          name=data["title"], value=data.get("info", "Brak info"), inline=False
       )
   await ctx.send(embed=embed)
 
@@ -233,41 +198,28 @@ async def dungeony(ctx):
 async def dodaj_wiki(
     ctx, kategoria: str, klucz: str, tytul: str, info: str, *, stats: str = "Brak"
 ):
-  """Komenda do dodawania wpisów przez admina"""
   wiki_data = load_json(WIKI_FILE)
-
   if kategoria not in wiki_data:
     wiki_data[kategoria] = {}
-
   wiki_data[kategoria][klucz.lower()] = {
       "title": tytul,
       "info": info,
       "stats": stats,
-      "desc": f"Wpis z ogólnej bazy wiedzy Pandora dla {tytul}.",
+      "desc": f"Wpis dla {tytul}.",
   }
   save_json(WIKI_FILE, wiki_data)
-  await ctx.send(
-      f"✅ Dodano do kategorii **{kategoria}** wpis: **{tytul}**!"
-  )
-
-
-# ==========================================
-# NASŁUCHIWANIE WIADOMOŚCI (Giełda i eventy)
-# ==========================================
+  await ctx.send(f"✅ Dodano do **{kategoria}**: **{tytul}**!")
 
 
 @bot.event
 async def on_message(message):
   if message.author.bot:
     return
-
-  # Działanie Giełdy: przechwytywanie w sekundę
   if message.channel.id == GIELDA_CHANNEL_ID:
     try:
-      await message.delete()  # Usuwa natychmiast z czatu
+      await message.delete()
     except:
       pass
-
     offers = load_json(MARKET_FILE)
     offers.append({
         "seller_id": message.author.id,
@@ -276,15 +228,15 @@ async def on_message(message):
     })
     save_json(MARKET_FILE, offers)
     return
-
   await bot.process_commands(message)
 
 
 @bot.event
 async def on_ready():
-  print(
-      f"Zalogowano jako {bot.user} - Giełda i ogólne Wiki działają bezbłędnie!"
-  )
+  print(f"Zalogowano jako {bot.user}!")
 
 
-bot.run(TOKEN)
+if TOKEN:
+  bot.run(TOKEN)
+else:
+  print("BŁĄD: Brak zmiennej środowiskowej TOKEN!")
