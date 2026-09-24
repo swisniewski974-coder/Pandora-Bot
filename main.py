@@ -4,9 +4,9 @@ import discord
 from discord.ext import commands
 
 # --- KONFIGURACJA ---
-TOKEN = "TOKEN = "TUTAJ_WKLEJ_SWÓJ_TOKEN_DISCORD"
-"
-GIELDA_CHANNEL_ID = (  # 1551642032680730735
+# Wklej swój token w cudzysłowie poniżej:
+TOKEN = "TUTAJ_WKLEJ_SWÓJ_TOKEN_DISCORD"
+GIELDA_CHANNEL_ID = (  # Zmień na ID swojego kanału giełdowego (musi być samymi cyframi!)
     123456789012345678
 )
 
@@ -122,7 +122,7 @@ async def panel_gieldy(ctx):
 
 @bot.command(name="wiki")
 async def wiki(ctx, *, query: str = None):
-  """Ogólna wyszukiwarka po całej bazie Wiki (przedmioty, bossy, dungeony)"""
+  """Ogólna wyszukiwarka po całej bazie Wiki"""
   if not query:
     embed = discord.Embed(
         title="📖 Ogólne Wiki Pandoramt2Mobile",
@@ -183,7 +183,10 @@ async def bossy(ctx):
   if not boss_list:
     embed.add_field(
         name="Brak danych",
-        value="Administrator nie dodał jeszcze bossów do bazy.",
+        value=(
+            "Administrator nie dodał jeszcze bossów. Użyj `!dodaj_wiki` aby"
+            " dodać."
+        ),
     )
   else:
     for key, data in boss_list.items():
@@ -209,7 +212,10 @@ async def dungeony(ctx):
   if not dung_list:
     embed.add_field(
         name="Brak danych",
-        value="Administrator nie dodał jeszcze dungeonów do bazy.",
+        value=(
+            "Administrator nie dodał jeszcze dungeonów. Użyj `!dodaj_wiki`"
+            " aby dodać."
+        ),
     )
   else:
     for key, data in dung_list.items():
@@ -226,7 +232,7 @@ async def dungeony(ctx):
 async def dodaj_wiki(
     ctx, kategoria: str, klucz: str, tytul: str, info: str, *, stats: str = "Brak"
 ):
-  """Komenda do dodawania wpisów: !dodaj_wiki bossy azrael 'Azrael' 'Piektyczne Katakumby' 'Drop: Zbroje 75+'"""
+  """Komenda do dodawania wpisów przez admina"""
   wiki_data = load_json(WIKI_FILE)
 
   if kategoria not in wiki_data:
@@ -276,7 +282,7 @@ async def on_message(message):
 @bot.event
 async def on_ready():
   print(
-      f"Zalogowano jako {bot.user} - Giełda i ogólne Wiki działają w pełni!"
+      f"Zalogowano jako {bot.user} - Giełda i ogólne Wiki działają bezbłędnie!"
   )
 
 
