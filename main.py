@@ -13,88 +13,64 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 MARKET_FILE = "market_offers.json"
 WIKI_FILE = "wiki_data.json"
 
-# Wstępna baza danych Wiki zaciągnięta bezpośrednio z prezentacji serwera
 DEFAULT_WIKI_DATA = {
     "bossy": {
         "minotaur": {
             "title": "Minotaur",
-            "info": "Boss na mapie Dolina Śmierci.",
-            "stats": "Wymagany lvl: 110 | Bonus: Silny przeciwko Nieumarłym",
+            "info": "Boss na mapie Dolina Śmierci",
+            "stats": "Wymagany lvl: 110",
         },
         "beransetao": {
             "title": "Beran-Setao",
-            "info": "Główny Boss w Komnacie Smoka.",
-            "stats": (
-                "Wymagany lvl: 110 | Koszt wejścia: 70kk Yang + Kręty Klucz |"
-                " Bonus: Diabły"
-            ),
+            "info": "Główny Boss w Komnacie Smoka",
+            "stats": "Wymagany lvl: 110 | Bonus: Diabły",
         },
         "lodowawiedzma": {
             "title": "Silna Lodowa Wiedźma",
             "info": "Mapowy Boss (resp 1h).",
-            "stats": (
-                "Koszt wejścia: 200kk Yang | Bonus: Silny przeciwko Diabłom"
-            ),
+            "stats": "Koszt wejścia: 200kk Yang",
         },
     },
     "dungeony": {
         "komnatasmoka": {
             "title": "Komnata Smoka",
-            "info": "Dungeon z bossem Beran-Setao.",
-            "stats": (
-                "Wymagany lvl: 110 | Koszt: 70.000.000 Yang + Kręty Klucz |"
-                " Bonus: Diabły"
-            ),
+            "info": "Dungeon z bossem Beran-Setao",
+            "stats": "Wymagany lvl: 110 | Bonus: Diabły",
         }
     },
     "mapy": {
         "dolinasmierci": {
             "title": "Dolina Śmierci",
-            "info": "Mapa z bossem Minotaur i Metinem Zagłady.",
-            "stats": (
-                "Wymagany lvl: 110 | Koszt: 100.000.000 Yang | Bonus: Nieumarłe"
-            ),
+            "info": "Mapa z bossem Minotaur",
+            "stats": "Wymagany lvl: 110",
         },
         "pustyniawygnancow": {
             "title": "Pustynia Wygnańców V2",
-            "info": "Mapa z Elit. Olbrzymim Żółwiem V2.",
-            "stats": (
-                "Wymagany lvl: 260 | Koszt: 300.000.000 Yang | Bonus: Nieumarłe"
-            ),
+            "info": "Mapa z Elit. Olbrzymim Bossom",
+            "stats": "Wymagany lvl: 260",
         },
         "kopalniazlota": {
             "title": "Kopalnia Złota",
-            "info": "Mapa eventowa/zarobkowa z bossem Alladyn.",
-            "stats": (
-                "Wymagany lvl: 35 - 55 | Przepustka: Kamień Glyph | Bonus: Orki"
-            ),
+            "info": "Mapa eventowa/zarobkowa",
+            "stats": "Wymagany lvl: 35 - 55",
         },
     },
     "nowosci": {
-        "legendarnekd": {
+        "legendarked": {
             "title": "Legendarne Kamienie Duszy",
-            "info": (
-                "Wytwarzane u Seon-Pyeonga / Ołtarzu Dusz z 10x KD +6 (60%"
-                " szans)."
-            ),
-            "stats": "Można ulepszać do +5, posiadają dodatkowe unikalne bonusy.",
-        },
-        "autobuff": {
-            "title": "Panel Autobuffa",
-            "info": (
-                "Pełni rolę pomocniczą dla klas innych niż Szaman (daje 50%"
-                " oryginalnego efektu)."
-            ),
-            "stats": "Wymaga Pieczęci Autobuffa.",
-        },
-        "zwierzaki": {
-            "title": "Panel Zwierzaka i Obroże",
-            "info": "System rozwoju towarzysza posiadający sloty na obroże.",
-            "stats": (
-                "Obroże zwiększają exp, obrażenia w potwory lub ludzi (Obroża"
-                " Bogacza)."
-            ),
-        },
+            "info": "Wytwarzane u Seon-Pyeonga",
+            "stats": "Zwiększona szansa.",
+        }
+    },
+    "autobuff": {
+        "title": "Panel Autobuffa",
+        "info": "Pełni rolę pomocniczą dla gracza.",
+        "stats": "Wymaga Pieczęci Autobuffa",
+    },
+    "zwierzaki": {
+        "title": "Panel Zwierzaka i Obroży",
+        "info": "System rozwoju towarzysza.",
+        "stats": "Obroże zwiększają exp i bonusy.",
     },
 }
 
@@ -127,13 +103,11 @@ class MarketView(discord.ui.View):
       style=discord.ButtonStyle.green,
       custom_id="view_market",
   )
-  async def view_market(
-      self, interaction: discord.Interaction, button: discord.ui.Button
-  ):
+  async def view_market(self, interaction: discord.Interaction):
     offers = load_json(MARKET_FILE)
     if not offers:
       await interaction.response.send_message(
-          "Aktualnie brak ofert na giełdzie!", ephemeral=True
+          "Aktualnie brak ofert na giełdzie.", ephemeral=True
       )
       return
 
@@ -143,12 +117,9 @@ class MarketView(discord.ui.View):
         color=discord.Color.gold(),
     )
     for i, o in enumerate(offers, 1):
-      desc = (
-          f"**Sprzedawca:** <@{o['seller_id']}>\n**Treść:** {o['item']}"
-          f"\n*Wystawiono automatycznie*"
-      )
+      desc = f"**Sprzedawca:** <@{o['seller_id']}>\n\nWystawiono automatycznie"
       if o.get("image_url"):
-        desc += f"\n[📸 Zobacz zdjęcie]({o['image_url']})"
+        desc += f"\n[🖼️ Zobacz zdjęcie]({o['image_url']})"
       embed.add_field(name=f"Oferta #{i}", value=desc, inline=False)
 
     await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -158,9 +129,7 @@ class MarketView(discord.ui.View):
       style=discord.ButtonStyle.red,
       custom_id="clear_my_offers",
   )
-  async def clear_my(
-      self, interaction: discord.Interaction, button: discord.ui.Button
-  ):
+  async def clear_my_offers(self, interaction: discord.Interaction):
     offers = load_json(MARKET_FILE)
     new_offers = [o for o in offers if o["seller_id"] != interaction.user.id]
     save_json(MARKET_FILE, new_offers)
@@ -169,82 +138,68 @@ class MarketView(discord.ui.View):
     )
 
 
-@bot.command(name="panel_gieldy")
+@bot.command(name="panel_giełdy")
 @commands.has_permissions(administrator=True)
-async def panel_gieldy(ctx):
+async def panel_giełdy(ctx):
   embed = discord.Embed(
       title="🏛️ Oficjalna Giełda Pandoramt2Mobile",
       description=(
-          "Napisz swoją ofertę (tekst + opcjonalnie zdjęcie) na tym kanale, a"
-          " bot natychmiast ją przechwyci!"
+          "Napisz swoją ofertę (tekst + opcjonalnie zdjęcie) na tym kanale,"
+          " a bot natychmiast ją przechwyci!"
       ),
       color=discord.Color.blue(),
   )
   await ctx.send(embed=embed, view=MarketView())
 
 
-# --- SYSTEM WIKI ---
-
-
-async def send_wiki_list(ctx, category_name, title_text, color):
+async def send_wiki_list(ctx, category_name, title_text):
   wiki_data = load_json(WIKI_FILE)
   items_list = wiki_data.get(category_name, {})
 
-  embed = discord.Embed(
-      title=title_text, description="Zarejestrowane wpisy z Wiki:", color=color
-  )
+  embed = discord.Embed(title=title_text, color=discord.Color.purple())
   if not items_list:
     embed.add_field(name="Brak danych", value="Brak wpisów w tej kategorii.")
   else:
     for key, data in items_list.items():
-      val = f"ℹ️ {data.get('info', 'Brak info')}\n📊 {data.get('stats', '')}"
+      val = f"ℹ️ {data.get('info', 'Brak info')}\n📊 {data.get('stats', 'Brak statystyk')}"
       embed.add_field(name=data["title"], value=val, inline=False)
+
   await ctx.send(embed=embed)
 
 
 @bot.command(name="bossy")
 async def bossy(ctx):
-  await send_wiki_list(
-      ctx, "bossy", "👹 Bossy w Pandoramt2Mobile", discord.Color.red()
-  )
+  await send_wiki_list(ctx, "bossy", "👹 Bossy w Pandoramt2Mobile")
 
 
 @bot.command(name="dungeony")
 async def dungeony(ctx):
-  await send_wiki_list(
-      ctx, "dungeony", "🏰 Dungeony w Pandoramt2Mobile", discord.Color.orange()
-  )
+  await send_wiki_list(ctx, "dungeony", "🏰 Dungeony w Pandoramt2Mobile")
 
 
 @bot.command(name="mapy")
 async def mapy(ctx):
-  await send_wiki_list(
-      ctx, "mapy", "🗺️ Mapy w Pandoramt2Mobile", discord.Color.green()
-  )
+  await send_wiki_list(ctx, "mapy", "🗺️ Mapy w Pandoramt2Mobile")
 
 
 @bot.command(name="nowosci")
 async def nowosci(ctx):
-  await send_wiki_list(
-      ctx, "nowosci", "✨ Nowości i Aktualizacje", discord.Color.blue()
-  )
+  await send_wiki_list(ctx, "nowosci", "✨ Nowości i Aktualizacje")
 
 
 @bot.command(name="dodaj_wiki")
 @commands.has_permissions(administrator=True)
-async def dodaj_wiki(
-    ctx, kategoria: str, klucz: str, tytul: str, info: str, *, stats: str = "Brak"
-):
+async def dodaj_wiki(ctx, kategoria: str, klucz: str, tytuł: str, *, info: str):
   wiki_data = load_json(WIKI_FILE)
   if kategoria not in wiki_data:
     wiki_data[kategoria] = {}
   wiki_data[kategoria][klucz.lower()] = {
-      "title": tytul,
+      "title": tytuł,
       "info": info,
-      "stats": stats,
+      "stats": "Brak dodatkowych statystyk",
   }
   save_json(WIKI_FILE, wiki_data)
-  await ctx.send(f"✅ Dodano do **{kategoria}**: **{tytul}**!")
+  await ctx.send(f"✅ Dodano do **{kategoria}** wpis: **{tytuł}**")
 
 
 @bot.event
@@ -252,14 +207,17 @@ async def on_message(message):
   if message.author.bot:
     return
 
-  # BEZPIECZNIK: Ignoruje komendy na kanale giełdy, żeby bot ich nie kasował
+  # Obsługa komend (nie blokuje dalszego kodu na giełdzie)
   if message.content.startswith("!"):
     await bot.process_commands(message)
-    return
 
-  # Obsługa giełdy (tekst + zdjęcia)
-  if message.channel.id == GIELDA_CHANNEL_ID:
-    image_url = message.attachments[0].url if message.attachments else None
+  # Obsługa giełdy (tekst + zdjęcia na wyznaczonym kanale)
+  if message.channel.id == GIELDA_CHANNEL_ID and not message.content.startswith(
+      "!"
+  ):
+    image_url = (
+        message.attachments[0].url if message.attachments else None
+    )
     content = message.content
 
     if content or image_url:
@@ -272,13 +230,11 @@ async def on_message(message):
       offers.append({
           "seller_id": message.author.id,
           "seller_name": message.author.name,
-          "item": content if content else "[Załącznik / Zdjęcie]",
+          "item": content if content else "[Tylko zdjęcie]",
           "image_url": image_url,
       })
       save_json(MARKET_FILE, offers)
       return
-
-  await bot.process_commands(message)
 
 
 @bot.event
